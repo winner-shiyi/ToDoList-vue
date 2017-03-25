@@ -1,10 +1,23 @@
 import bar from './bar'
 //bar();
 import Vue from 'vue'
+import AV from 'leancloud-storage'
+
+var APP_ID = 'WhfLfN9drHubYfXs3SERLo1m-gzGzoHsz';
+var APP_KEY = '4fjSbgQaxdBF676IO57O3QNj';
+AV.init({
+  appId: APP_ID,
+  appKey: APP_KEY
+});
 
 var app = new Vue({
 	el:'#app',
 	data:{
+		actionType:'signUp',
+		formData:{
+			username:'',
+			password:''
+		},
 		newTodo:'',
 		todoList:[]
 	},
@@ -54,6 +67,16 @@ var app = new Vue({
 		    }
 		    let tpl = dtArray[0] +'年'+ dtArray[1] +'月'+ dtArray[2] +'日 '+ dtArray[3] +':'+ dtArray[4]
 		    return tpl
+		},
+		signUp:function(){
+			let user =new AV.User()
+			user.setUsername(this.formData.username)
+			user.setPassword(this.formData.password)
+			user.signUp().then(function(loginedUser){
+				console.log(loginedUser)
+			},function(error){
+
+			})
 		}
 	}
 })
