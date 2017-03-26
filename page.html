@@ -11,7 +11,7 @@
 </head>
 <body>
 	<div id="app">
-		<section id="signInAndSignUp">
+		<section id="signInAndSignUp" v-if="!currentUser">
 			<div>
 				<label><input type="radio" name="type" v-model="actionType" value="signUp">注册</label>
 				<label><input type="radio" name="type" v-model="actionType" value="login">登录</label>
@@ -24,22 +24,24 @@
 				</form>
 			</div>
 			<div class="login" v-if="actionType=='login'">
-				<form action="">
-					<div class="formRow">用户名<input type="text"></div>
-					<div class="formRow">密码<input type="password"></div>
+				<form @submit.prevent="login">
+					<div class="formRow">用户名<input type="text" v-model="formData.username"></div>
+					<div class="formRow">密码<input type="password" v-model="formData.password"></div>
 					<div class="formActions"><input type="submit" value="登录"></div>
 				</form>
 			</div>
 		</section>
 
-		<section id="todo">
+		<section id="todo" v-if="currentUser">
+			<p><span>用户名：{{ currentUser.username }}</span><button @click="logout">登出</button></p>
 			<div class="newTask">
 				<input type="text" v-model="newTodo" v-on:keypress.enter="addTodo" placeholder="请输入清单">
 			</div>
 			<ol class="todos">
-				<li v-for="todo in todoList" v-bind:class="{finish: todo.done}">
-					<input type="checkbox" v-model="todo.done">
-					{{ todo.title }}
+				<li v-for="(todo,index) in todoList" v-bind:class="{finish: todo.done}">
+					<!-- 给单选框todo.done绑定了 @change='saveOrUpdateTodos()'事件，刷新后可以保存 -->
+					<input type="checkbox" v-model="todo.done" @change="saveOrUpdateTodos()">
+					{{ index+1 }}.{{ todo.title }}
 					<span v-if="todo.done">已完成</span>
 					<span v-else>未完成</span>
 					<span>创建时间</span>
