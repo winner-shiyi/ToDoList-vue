@@ -1,5 +1,4 @@
-import bar from './bar'
-//bar();
+import style from './style.css'
 import Vue from 'vue'
 import AV from 'leancloud-storage'
 
@@ -41,7 +40,7 @@ var app = new Vue({
 						console.log(todos)
 					}, function(error){
 						// 异常处理
-						console.log(error) 
+						console.log(error)
 				})
 			}
 		},

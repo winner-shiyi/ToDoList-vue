@@ -1,0 +1,31 @@
+@charset "utf-8";
+*{
+    padding:0;
+    margin:0;
+    box-sizing:border-box;
+}
+ul,li{
+    list-style:none;
+}
+body{
+    font-family:"Helvetica Neue",Helvetica,Arial,"Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+}
+#signInAndSignUp{
+    background: #353F55;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+.signLogin-dlg{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50% -50%);
+}
+.signLogin-dlg h1{
+    text-align:center;
+    font-size:2rem;
+    color:#fff;
+    margin-bottom:
+}
