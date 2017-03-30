@@ -2,12 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>todo-vue</title>
-    <style>
-    .finish{
-    	text-decoration:line-through;
-    }
-    </style>
+    <title>ToDoList</title>
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
 	<div id="app">
@@ -45,7 +41,7 @@
 			<ul class="catlist">
 				<li @click="filterAll"><i class="fa fa-tags"></i>&nbsp;全部</li>
 				<li @click="filterTodo"><i class="fa fa-clock-o"></i>&nbsp;待办</li>
-				<li @click="filterFinished"><i class="fa a-check-circle-o"></i>&nbsp;已完成</li>
+				<li @click="filterFinished"><i class="fa fa-check-circle-o"></i>&nbsp;完成</li>
 			</ul>
 		</div>
 		<div class="viewpart">

@@ -135,7 +135,33 @@ body{
     height: 100vh;
     color: #fff;
 }
-
+.sidebar h1{
+    width:60%;
+    margin:30px auto;
+    padding-bottom:20px;
+    letter-spacing:3px;
+    white-space:nowrap;
+}
+.sidebar h3{
+    width:60%;
+    margin:10px auto;
+}
+.sidebar .catlist{
+    width: 60%;
+    margin:0 auto;
+}
+.sidebar .catlist li{
+    margin: 10px 0;
+    height: 40px;
+    line-height: 40px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.sidebar .catlist li i{
+    width: 30px;
+    height: 50px;
+    line-height: 50px;
+}
 .viewpart{
     float:right;
     width:80%;
