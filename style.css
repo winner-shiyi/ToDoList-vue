@@ -18,6 +18,17 @@ body{
 .clearfix{
     *zoom:1;
 }
+input{
+    outline:none;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    transition: all ease-in-out .15s;
+}
+input:focus{
+    outline:none;
+    border-color: #66afe9;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
 #signInAndSignUp{
     background: #353F55;
     width: 100vw;
@@ -91,10 +102,8 @@ body{
     line-height:40px;
     margin: 0 auto;
     background: #faffbd;
-    border: 1px solid #D7E3F2;
     border-radius: 5px;
     padding: 0 10px;
-    outline:none;
 }
 .dlg-wrapper .formActions{
     float:right;
@@ -166,4 +175,115 @@ body{
     float:right;
     width:80%;
     padding:20px 50px;
+    background:#fff;
 }
+.viewpart .newTask input{
+    width: 300px;
+    height: 50px;
+    line-height:50px;
+    padding: 5px 12px;
+    font-size: 1.2rem;
+    border-radius: 4px
+}
+.viewpart .btn{
+   display: inline-block;
+   width: 100px;
+   height: 40px;
+   line-height: 40px;
+   border-radius: 5px;
+   color: #fff;
+   margin-left: 10px;
+   cursor: pointer;
+   text-align: center;
+   transition: all .3s; 
+}
+.viewpart .add{
+    background: #5CC853;
+}
+.viewpart .add:hover{
+    background: #469c46;
+}
+.viewpart .empty{
+    background: #D9534F;
+}
+.viewpart .empty:hover{
+    background: #B72712;
+}
+.viewpart .user-name{
+    float: right;
+    height: 50px;
+    line-height: 50px;
+    color: #777;
+    font-size: 14px;
+}
+.logout{
+    padding: 8px 10px;
+    background:#fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #777;
+    margin-left: 10px;
+    outline:none;
+    transition: all 0.5s;
+}
+.logout:hover{
+    background: #eee;
+}
+    
+.viewpart .todos{
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.viewpart .todos li{
+   padding: 10px 16px;
+   height: 60px;
+   line-height: 60px;
+   border-bottom: 1px solid #ccc;
+   position: relative; 
+}
+.viewpart .todos li.finished {
+    background: #eee;
+}
+.viewpart .todos li:last-child{
+    border-bottom:none;
+}
+.viewpart .todos .active i{
+    transition: all 0.5s;
+    color: #5CC853;
+} 
+.viewpart .todos li span:nth-child(1),
+.viewpart .todos li span:nth-child(2),
+.viewpart .todos li span:nth-child(3)
+{
+    position: absolute;
+    top:50%;
+    transform:translateY(-50%);
+}
+.viewpart .todos li span:nth-child(2){
+    left:50px;
+    cursor:pointer;
+}
+.viewpart .todos li span:nth-child(3){
+    right:90px;
+    color:#ccc;
+    font-size:12px;
+}
+.viewpart .todos .del{
+    position:absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 16px;
+    width: 50px;
+    background: #FFDA44;
+}
+.viewpart .todos .del:hover{
+    background: #FDD048;
+}
+
+
+
+
+    
