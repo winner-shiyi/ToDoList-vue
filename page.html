@@ -14,6 +14,7 @@
 		<section id="signInAndSignUp" v-if="!currentUser">
 			<div class="signLogin-dlg">
 				<h1>ToDoList</h1>
+				<p class="comeon">现在的你一定感谢过去努力的你</p>
 				<div class="dlg-wrapper">
 					<div class="sign-ct">
 						<label :class="{active:actionType === 'signUp'}"><input type="radio" name="type" v-model="actionType" value="signUp">注册</label>
@@ -37,7 +38,7 @@
 			</div>
 		</section>
 
-		<section id="todo" v-if="currentUser">
+		<section id="todo" v-if="currentUser" class="clearfix">
 		<div class="sidebar">
 			<h1>ToDoList</h1>
 			<h3>筛选</h3>
@@ -47,26 +48,27 @@
 				<li @click="filterFinished"><i class="fa a-check-circle-o"></i>&nbsp;已完成</li>
 			</ul>
 		</div>
-
 		<div class="viewpart">
 			<div class="newTask clearfix">
 				<input type="text" v-model="newTodo" v-on:keypress.enter="addTodo" placeholder="今日事今日毕，加油哦~">
+				<span class="btn add" @click="addTodo">添加事项</span>
+				<span class="btn empty" @click="clearAll">清空列表</span>
+				<p>你好,{{ currentUser.username }}</span><button @click="logout">退出</button></p>
 			</div>
-		</div>
-			<p><span>用户名：{{ currentUser.username }}</span><button @click="logout">登出</button></p>
-
 			<ol class="todos">
 				<li v-for="(todo,index) in todoList" v-bind:class="{finish: todo.done}">
 					<!-- 给单选框todo.done绑定了 @change='saveOrUpdateTodos()'事件，刷新后可以保存 -->
-					<input type="checkbox" v-model="todo.done" @change="saveOrUpdateTodos()">
-					{{ index+1 }}.{{ todo.title }}
-					<span v-if="todo.done">已完成</span>
-					<span v-else>未完成</span>
-					<span>创建时间</span>
-					<span>{{ todo.createdAt }}</span>
-					<button v-on:click="removeTodo(todo)">X</button>
+					<!-- <input type="checkbox" v-model="todo.done" @change="saveOrUpdateTodos()">
+					{{ index+1 }}.{{ todo.title }} -->
+
+					<span class="inactive" v-if="todo.done"><i class="fa fa-circle"></i></span>
+					<span class="active" v-else><i class="fa fa-circle"></i></span>
+					<span :class="{finished:todo.done}" @click="saveOrUpdateTodos()">{{ index+1 }}.{{ todo.title }}</span>
+					<span>创建时间:{{ todo.createdAt }}</span>
+					<span class="btn del fa fa-trash-o" v-on:click="removeTodo(todo)"></span>
 				</li>
 			</ol>
+		</div>
 		</section>
 	</div>
 	<script src="bundle.js"></script>
