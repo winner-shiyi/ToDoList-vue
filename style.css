@@ -195,7 +195,7 @@ input:focus{
    margin-left: 10px;
    cursor: pointer;
    text-align: center;
-   transition: all .3s; 
+   transition: all .3s;
 }
 .viewpart .add{
     background: #5CC853;
@@ -230,7 +230,7 @@ input:focus{
 .logout:hover{
     background: #eee;
 }
-    
+
 .viewpart .todos{
     margin-top: 20px;
     border: 1px solid #ccc;
@@ -242,7 +242,7 @@ input:focus{
    height: 60px;
    line-height: 60px;
    border-bottom: 1px solid #ccc;
-   position: relative; 
+   position: relative;
 }
 .viewpart .todos li.finished {
     background: #eee;
@@ -253,7 +253,7 @@ input:focus{
 .viewpart .todos .active i{
     transition: all 0.5s;
     color: #5CC853;
-} 
+}
 .viewpart .todos li span:nth-child(1),
 .viewpart .todos li span:nth-child(2),
 .viewpart .todos li span:nth-child(3)
@@ -282,8 +282,11 @@ input:focus{
 .viewpart .todos .del:hover{
     background: #FDD048;
 }
+.todos i.fa{
+    cursor:pointer;
+}
 
 
 
 
-    
+
