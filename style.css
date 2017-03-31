@@ -265,6 +265,10 @@ input:focus{
 .viewpart .todos li span:nth-child(2){
     left:50px;
     cursor:pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 60%;
+    overflow: hidden;
 }
 .viewpart .todos li span:nth-child(3){
     right:90px;
@@ -280,7 +284,7 @@ input:focus{
     background: #FFDA44;
 }
 .viewpart .todos .del:hover{
-    background: #FDD048;
+    background:#e2be50;
 }
 .todos i.fa{
     cursor:pointer;

@@ -59,7 +59,7 @@
 
 					<span class="inactive" v-if="todo.done"><i class="fa fa-circle"></i></span>
 					<span class="active" v-else><i class="fa fa-circle"></i></span>
-					<span :class="{finished:todo.done}" @click="saveOrUpdateTodos()">{{ index+1 }}.{{ todo.title }}</span>
+					<span :class="{finished:todo.done}" @click="saveOrUpdateTodos()" :title="todo.title">{{ index+1 }}.{{ todo.title }}</span>
 					<span>创建时间:{{ todo.createdAt }}</span>
 					<span class="btn del fa fa-trash-o" v-on:click="removeTodo(todo)"></span>
 				</li>
