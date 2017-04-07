@@ -49,7 +49,7 @@ input:focus{
     animation:typing 6s steps(15);
     text-align: center;
     margin: 0 0 25px;
-    color: beige;
+    color: #faffbd;
     font:bold 100% Consolas, Monaco, monospace;
 }
 @keyframes typing{
