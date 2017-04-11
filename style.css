@@ -297,6 +297,15 @@ input:focus{
 .todos i.fa{
     cursor:pointer;
 }
+.viewpart .todos li span.finished {
+    transition: all 0.5s;
+    color: #ccc;
+    text-decoration: line-through;
+}
+.viewpart .todos li span.inactive i {
+    transition: all 0.5s;
+    color: #ccc;
+}
 
 
 

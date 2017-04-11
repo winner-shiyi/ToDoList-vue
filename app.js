@@ -123,6 +123,13 @@ var app = new Vue({
 		    let tpl = dtArray[0] +'年'+ dtArray[1] +'月'+ dtArray[2] +'日 '+ dtArray[3] +':'+ dtArray[4]
 		    return tpl
 		},
+		clearAll:function(){
+		    this.todoList = []
+		},
+		toggleFinish:function(todo){
+			todo.done = !todo.done
+			this.saveOrUpdateTodos()
+		},
 		signUp:function(){
 			let user =new AV.User()
 			user.setUsername(this.formData.username)

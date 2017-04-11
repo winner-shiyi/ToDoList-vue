@@ -47,20 +47,20 @@
 		</div>
 		<div class="viewpart">
 			<div class="newTask clearfix">
-				<input type="text" v-model="newTodo" v-on:keypress.enter="addTodo" placeholder="今日事今日毕，加油哦~">
+				<input type="text" v-model.trim="newTodo" v-on:keypress.enter="addTodo" placeholder="今日事今日毕，加油哦~">
 				<span class="btn add" @click="addTodo">添加事项</span>
 				<span class="btn empty" @click="clearAll">清空列表</span>
 				<p class="user-name">你好，{{ currentUser.username }}</span><button @click="logout" class="logout">退出</button></p>
 			</div>
 			<ol class="todos">
-				<li v-for="(todo,index) in todoList" v-bind:class="{finish: todo.done}">
+				<li v-for="(todo,index) in todoList" v-bind:class="{finished: todo.done}">
 					<!-- 给单选框todo.done绑定了 @change='saveOrUpdateTodos()'事件，刷新后可以保存 -->
 					<!-- <input type="checkbox" v-model="todo.done" @change="saveOrUpdateTodos()">
 					{{ index+1 }}.{{ todo.title }} -->
 
-					<span class="inactive" v-if="todo.done"><i class="fa fa-circle"></i></span>
-					<span class="active" v-else><i class="fa fa-circle"></i></span>
-					<span :class="{finished:todo.done}" @click="saveOrUpdateTodos()" :title="todo.title">{{ index+1 }}.{{ todo.title }}</span>
+					<span class="inactive" v-if="todo.done"><i class="fa fa-circle" @click="toggleFinish(todo)"></i></span>
+					<span class="active" v-else><i class="fa fa-circle" @click="toggleFinish(todo)"></i></span>
+					<span :class="{finished:todo.done}" @click="toggleFinish(todo)" :title="todo.title">{{ todo.title }}</span>
 					<span>创建时间:{{ todo.createdAt }}</span>
 					<span class="btn del fa fa-trash-o" v-on:click="removeTodo(todo)"></span>
 				</li>
