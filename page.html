@@ -57,7 +57,6 @@
 					<!-- 给单选框todo.done绑定了 @change='saveOrUpdateTodos()'事件，刷新后可以保存 -->
 					<!-- <input type="checkbox" v-model="todo.done" @change="saveOrUpdateTodos()">
 					{{ index+1 }}.{{ todo.title }} -->
-
 					<span class="inactive" v-if="todo.done"><i class="fa fa-circle" @click="toggleFinish(todo)"></i></span>
 					<span class="active" v-else><i class="fa fa-circle" @click="toggleFinish(todo)"></i></span>
 					<span :class="{finished:todo.done}" @click="toggleFinish(todo)" :title="todo.title">{{ todo.title }}</span>
