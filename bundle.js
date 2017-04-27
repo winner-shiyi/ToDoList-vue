@@ -25582,6 +25582,12 @@ var app = new _vue2.default({
 			var tpl = dtArray[0] + '年' + dtArray[1] + '月' + dtArray[2] + '日 ' + dtArray[3] + ':' + dtArray[4];
 			return tpl;
 		},
+		clearall: function clearall() {
+			var _id = this.todoList.id;
+			this.todoList = [];
+			this.todoList.id = _id;
+			this.saveOrUpdateTodos();
+		},
 		saveOldList: function saveOldList() {
 			this.oldList = this.todoList;
 		},

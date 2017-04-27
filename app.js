@@ -61,6 +61,12 @@ var app = new Vue({
 		    let tpl = dtArray[0] +'年'+ dtArray[1] +'月'+ dtArray[2] +'日 '+ dtArray[3] +':'+ dtArray[4]
 		    return tpl
 		},
+		clearall:function(){
+			var _id = this.todoList.id
+		    this.todoList = []
+		    this.todoList.id = _id
+		    this.saveOrUpdateTodos()
+		},
 		saveOldList:function(){
 		    this.oldList = this.todoList
 		},
