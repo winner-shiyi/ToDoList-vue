@@ -21,72 +21,10 @@ var app = new Vue({
 		},
 		currentUser:null
 	},
-	created:function(){
-		this.currentUser = this.getCurrentUser()
-		this.fetchTodos()
-	},
 	methods:{
-		fetchTodos:function(){
-			if(this.currentUser){
-				// 查询某个 AV.Object 实例，之后进行修改
-				var query = new AV.Query('AllTodos')
-				// find 方法是一个异步方法，会返回一个 Promise，之后可以使用 then 方法
-					query.find().then((todos)=> {
-						let avAllTodos = todos[0]// 因为理论上 AllTodos 只有一个，所以我们取结果的第一项
-						let id = avAllTodos.id
-						this.todoList = JSON.parse(avAllTodos.attributes.content)
-						this.todoList.id = id
-						// 更新成功
-						console.log(todos)
-					}, function(error){
-						// 异常处理
-						console.log(error)
-				})
-			}
-		},
-		updateTodos:function(){
-			//使用 JSON.stringify 把数组转换为 JSON 字符串
-			let dataString = JSON.stringify(this.todoList)
-			// 第一个参数是 className，第二个参数是 objectId
-			let avTodos = AV.Object.createWithoutData('AllTodos', this.todoList.id)
-			// 修改属性
-			avTodos.set('content', dataString)
-			// 保存到云端
-			avTodos.save().then(()=>{
-				console.log('更新成功')
-			})
-		},
-		saveTodos:function(){
-
-			//使用 JSON.stringify 把数组转换为 JSON 字符串
-			let dataString = JSON.stringify(this.todoList)
-			// 声明一个 AVTodos 类型
-			var AVTodos = AV.Object.extend('AllTodos')
-			// 新建一个 avTodos 对象
-			var avTodos = new AVTodos()
-			// 新建一个 ACL 实例
-			var acl = new AV.ACL()
-			acl.setReadAccess(AV.User.current(),true) // 只有这个 user 能读
-			acl.setWriteAccess(AV.User.current(),true) // 只有这个 user 能写
-
-			avTodos.set('content', dataString)
-
-			avTodos.setACL(acl) // 设置访问控制
-
-			avTodos.save().then((todo)=>{
-				//一定要记得把 id 挂到 this.todoList 上，否则下次就不会调用 updateTodos 了
-				this.todoList.id = todo.id
-			  	console.log('保存成功')
-			},function(error){
-			  	console.log('保存失败')
-			})
-		},
-		saveOrUpdateTodos:function(){
-			if(this.todoList.id){
-				this.updateTodos()
-			}else{
-				this.saveTodos()
-			}
+		toggleFinish:function(todo){
+			todo.done = !todo.done
+			this.saveOrUpdateTodos()
 		},
 		addTodo:function(){
 			if(!/\S/g.test(this.newTodo)){
@@ -123,12 +61,37 @@ var app = new Vue({
 		    let tpl = dtArray[0] +'年'+ dtArray[1] +'月'+ dtArray[2] +'日 '+ dtArray[3] +':'+ dtArray[4]
 		    return tpl
 		},
-		clearAll:function(){
-		    this.todoList = []
+		saveOldList:function(){
+		    this.oldList = this.todoList
 		},
-		toggleFinish:function(todo){
-			todo.done = !todo.done
-			this.saveOrUpdateTodos()
+		filterAllTodo:function(){
+			if(this.oldList===undefined){
+				return
+			}else{
+				this.todoList = this.oldList
+			}
+		},
+		filterActiveTodo:function(){
+			this.filterAllTodo()
+			this.saveOldList()
+			let activeList = []
+			for(var i=0;i<this.todoList.length;i++){
+				if(this.todoList[i].done===false){
+					activeList.push(this.todoList[i])
+				}
+			}
+			this.todoList = activeList
+		},
+		filterFinishedTodo:function(){
+			this.filterAllTodo()
+			this.saveOldList()
+			let finList = []
+			for(var i=0;i<this.todoList.length;i++){
+				if(this.todoList[i].done===true){
+					finList.push(this.todoList[i])
+				}
+			}
+			this.todoList = finList
 		},
 		signUp:function(){
 			let user =new AV.User()
@@ -149,6 +112,11 @@ var app = new Vue({
 			  	alert('登录失败，请重试~')
 			})
 		},
+		logout:function(){
+			AV.User.logOut()
+			this.currentUser = null
+			window.location.reload()//退出的时候为啥要刷新页面
+		},
 		getCurrentUser:function(){
 			let current = AV.User.current()
 			if(current){
@@ -159,10 +127,69 @@ var app = new Vue({
 				return null
 			}
 		},
-		logout:function(){
-			AV.User.logOut()
-			this.currentUser = null
-			window.location.reload()//退出的时候为啥要刷新页面
+		saveTodos:function(){
+
+			//使用 JSON.stringify 把数组转换为 JSON 字符串
+			let dataString = JSON.stringify(this.todoList)
+			// 声明一个 AVTodos 类型
+			var AVTodos = AV.Object.extend('AllTodos')
+			// 新建一个 avTodos 对象
+			var avTodos = new AVTodos()
+			// 新建一个 ACL 实例
+			var acl = new AV.ACL()
+			acl.setReadAccess(AV.User.current(),true) // 只有这个 user 能读
+			acl.setWriteAccess(AV.User.current(),true) // 只有这个 user 能写
+
+			avTodos.set('content', dataString)
+
+			avTodos.setACL(acl) // 设置访问控制
+
+			avTodos.save().then((todo)=>{
+				//一定要记得把 id 挂到 this.todoList 上，否则下次就不会调用 updateTodos 了
+				this.todoList.id = todo.id
+			  	console.log('保存成功')
+			},function(error){
+			  	console.log('保存失败')
+			})
+		},
+		updateTodos:function(){
+			//使用 JSON.stringify 把数组转换为 JSON 字符串
+			let dataString = JSON.stringify(this.todoList)
+			// 第一个参数是 className，第二个参数是 objectId
+			let avTodos = AV.Object.createWithoutData('AllTodos', this.todoList.id)
+			// 修改属性
+			avTodos.set('content', dataString)
+			// 保存到云端
+			avTodos.save().then(()=>{
+				console.log('更新成功')
+			})
+		},
+		saveOrUpdateTodos:function(){
+			if(this.todoList.id){
+				this.updateTodos()
+			}else{
+				this.saveTodos()
+			}
+		},
+		fetchTodos:function(){
+			if(this.currentUser){
+				// 查询某个 AV.Object 实例，之后进行修改
+				var query = new AV.Query('AllTodos')
+				// find 方法是一个异步方法，会返回一个 Promise，之后可以使用 then 方法
+					query.find().then((todos)=> {
+						let avAllTodos = todos[0]// 因为理论上 AllTodos 只有一个，所以我们取结果的第一项
+						let id = avAllTodos.id
+						this.todoList = JSON.parse(avAllTodos.attributes.content)
+						this.todoList.id = id
+					}, function(error){
+						// 异常处理
+						console.log(error)
+				})
+			}
 		}
+	},
+	created:function(){
+		this.currentUser = this.getCurrentUser()
+		this.fetchTodos()
 	}
 })

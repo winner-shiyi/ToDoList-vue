@@ -25542,75 +25542,10 @@ var app = new _vue2.default({
 		},
 		currentUser: null
 	},
-	created: function created() {
-		this.currentUser = this.getCurrentUser();
-		this.fetchTodos();
-	},
 	methods: {
-		fetchTodos: function fetchTodos() {
-			var _this = this;
-
-			if (this.currentUser) {
-				// 查询某个 AV.Object 实例，之后进行修改
-				var query = new _leancloudStorage2.default.Query('AllTodos');
-				// find 方法是一个异步方法，会返回一个 Promise，之后可以使用 then 方法
-				query.find().then(function (todos) {
-					var avAllTodos = todos[0]; // 因为理论上 AllTodos 只有一个，所以我们取结果的第一项
-					var id = avAllTodos.id;
-					_this.todoList = JSON.parse(avAllTodos.attributes.content);
-					_this.todoList.id = id;
-					// 更新成功
-					console.log(todos);
-				}, function (error) {
-					// 异常处理
-					console.log(error);
-				});
-			}
-		},
-		updateTodos: function updateTodos() {
-			//使用 JSON.stringify 把数组转换为 JSON 字符串
-			var dataString = JSON.stringify(this.todoList);
-			// 第一个参数是 className，第二个参数是 objectId
-			var avTodos = _leancloudStorage2.default.Object.createWithoutData('AllTodos', this.todoList.id);
-			// 修改属性
-			avTodos.set('content', dataString);
-			// 保存到云端
-			avTodos.save().then(function () {
-				console.log('更新成功');
-			});
-		},
-		saveTodos: function saveTodos() {
-			var _this2 = this;
-
-			//使用 JSON.stringify 把数组转换为 JSON 字符串
-			var dataString = JSON.stringify(this.todoList);
-			// 声明一个 AVTodos 类型
-			var AVTodos = _leancloudStorage2.default.Object.extend('AllTodos');
-			// 新建一个 avTodos 对象
-			var avTodos = new AVTodos();
-			// 新建一个 ACL 实例
-			var acl = new _leancloudStorage2.default.ACL();
-			acl.setReadAccess(_leancloudStorage2.default.User.current(), true); // 只有这个 user 能读
-			acl.setWriteAccess(_leancloudStorage2.default.User.current(), true); // 只有这个 user 能写
-
-			avTodos.set('content', dataString);
-
-			avTodos.setACL(acl); // 设置访问控制
-
-			avTodos.save().then(function (todo) {
-				//一定要记得把 id 挂到 this.todoList 上，否则下次就不会调用 updateTodos 了
-				_this2.todoList.id = todo.id;
-				console.log('保存成功');
-			}, function (error) {
-				console.log('保存失败');
-			});
-		},
-		saveOrUpdateTodos: function saveOrUpdateTodos() {
-			if (this.todoList.id) {
-				this.updateTodos();
-			} else {
-				this.saveTodos();
-			}
+		toggleFinish: function toggleFinish(todo) {
+			todo.done = !todo.done;
+			this.saveOrUpdateTodos();
 		},
 		addTodo: function addTodo() {
 			if (!/\S/g.test(this.newTodo)) {
@@ -25647,15 +25582,40 @@ var app = new _vue2.default({
 			var tpl = dtArray[0] + '年' + dtArray[1] + '月' + dtArray[2] + '日 ' + dtArray[3] + ':' + dtArray[4];
 			return tpl;
 		},
-		clearAll: function clearAll() {
-			this.todoList = [];
+		saveOldList: function saveOldList() {
+			this.oldList = this.todoList;
 		},
-		toggleFinish: function toggleFinish(todo) {
-			todo.done = !todo.done;
-			this.saveOrUpdateTodos();
+		filterAllTodo: function filterAllTodo() {
+			if (this.oldList === undefined) {
+				return;
+			} else {
+				this.todoList = this.oldList;
+			}
+		},
+		filterActiveTodo: function filterActiveTodo() {
+			this.filterAllTodo();
+			this.saveOldList();
+			var activeList = [];
+			for (var i = 0; i < this.todoList.length; i++) {
+				if (this.todoList[i].done === false) {
+					activeList.push(this.todoList[i]);
+				}
+			}
+			this.todoList = activeList;
+		},
+		filterFinishedTodo: function filterFinishedTodo() {
+			this.filterAllTodo();
+			this.saveOldList();
+			var finList = [];
+			for (var i = 0; i < this.todoList.length; i++) {
+				if (this.todoList[i].done === true) {
+					finList.push(this.todoList[i]);
+				}
+			}
+			this.todoList = finList;
 		},
 		signUp: function signUp() {
-			var _this3 = this;
+			var _this = this;
 
 			var user = new _leancloudStorage2.default.User();
 			user.setUsername(this.formData.username);
@@ -25663,20 +25623,25 @@ var app = new _vue2.default({
 
 			user.signUp().then(function (loginedUser) {
 				//将 function 改成箭头函数，方便使用 this
-				_this3.currentUser = _this3.getCurrentUser();
+				_this.currentUser = _this.getCurrentUser();
 			}, function (error) {
 				alert('注册失败，请重试~');
 			});
 		},
 		login: function login() {
-			var _this4 = this;
+			var _this2 = this;
 
 			_leancloudStorage2.default.User.logIn(this.formData.username, this.formData.password).then(function (loginedUser) {
-				_this4.currentUser = _this4.getCurrentUser();
-				_this4.fetchTodos(); // 登录成功后读取 todos
+				_this2.currentUser = _this2.getCurrentUser();
+				_this2.fetchTodos(); // 登录成功后读取 todos
 			}, function (error) {
 				alert('登录失败，请重试~');
 			});
+		},
+		logout: function logout() {
+			_leancloudStorage2.default.User.logOut();
+			this.currentUser = null;
+			window.location.reload(); //退出的时候为啥要刷新页面
 		},
 		getCurrentUser: function getCurrentUser() {
 			var current = _leancloudStorage2.default.User.current();
@@ -25691,11 +25656,73 @@ var app = new _vue2.default({
 				return null;
 			}
 		},
-		logout: function logout() {
-			_leancloudStorage2.default.User.logOut();
-			this.currentUser = null;
-			window.location.reload(); //退出的时候为啥要刷新页面
+		saveTodos: function saveTodos() {
+			var _this3 = this;
+
+			//使用 JSON.stringify 把数组转换为 JSON 字符串
+			var dataString = JSON.stringify(this.todoList);
+			// 声明一个 AVTodos 类型
+			var AVTodos = _leancloudStorage2.default.Object.extend('AllTodos');
+			// 新建一个 avTodos 对象
+			var avTodos = new AVTodos();
+			// 新建一个 ACL 实例
+			var acl = new _leancloudStorage2.default.ACL();
+			acl.setReadAccess(_leancloudStorage2.default.User.current(), true); // 只有这个 user 能读
+			acl.setWriteAccess(_leancloudStorage2.default.User.current(), true); // 只有这个 user 能写
+
+			avTodos.set('content', dataString);
+
+			avTodos.setACL(acl); // 设置访问控制
+
+			avTodos.save().then(function (todo) {
+				//一定要记得把 id 挂到 this.todoList 上，否则下次就不会调用 updateTodos 了
+				_this3.todoList.id = todo.id;
+				console.log('保存成功');
+			}, function (error) {
+				console.log('保存失败');
+			});
+		},
+		updateTodos: function updateTodos() {
+			//使用 JSON.stringify 把数组转换为 JSON 字符串
+			var dataString = JSON.stringify(this.todoList);
+			// 第一个参数是 className，第二个参数是 objectId
+			var avTodos = _leancloudStorage2.default.Object.createWithoutData('AllTodos', this.todoList.id);
+			// 修改属性
+			avTodos.set('content', dataString);
+			// 保存到云端
+			avTodos.save().then(function () {
+				console.log('更新成功');
+			});
+		},
+		saveOrUpdateTodos: function saveOrUpdateTodos() {
+			if (this.todoList.id) {
+				this.updateTodos();
+			} else {
+				this.saveTodos();
+			}
+		},
+		fetchTodos: function fetchTodos() {
+			var _this4 = this;
+
+			if (this.currentUser) {
+				// 查询某个 AV.Object 实例，之后进行修改
+				var query = new _leancloudStorage2.default.Query('AllTodos');
+				// find 方法是一个异步方法，会返回一个 Promise，之后可以使用 then 方法
+				query.find().then(function (todos) {
+					var avAllTodos = todos[0]; // 因为理论上 AllTodos 只有一个，所以我们取结果的第一项
+					var id = avAllTodos.id;
+					_this4.todoList = JSON.parse(avAllTodos.attributes.content);
+					_this4.todoList.id = id;
+				}, function (error) {
+					// 异常处理
+					console.log(error);
+				});
+			}
 		}
+	},
+	created: function created() {
+		this.currentUser = this.getCurrentUser();
+		this.fetchTodos();
 	}
 });
 
@@ -25829,7 +25856,7 @@ exports = module.exports = __webpack_require__(9)(undefined);
 
 
 // module
-exports.push([module.i, "@charset \"utf-8\";\r\n*{\r\n    padding:0;\r\n    margin:0;\r\n    box-sizing:border-box;\r\n}\r\nul,li{\r\n    list-style:none;\r\n}\r\nbody{\r\n    font-family:\"Helvetica Neue\",Helvetica,Arial,\"Microsoft YaHei\",\"WenQuanYi Micro Hei\",sans-serif;\r\n}\r\n.clearfix:after{\r\n    content:\"\";\r\n    display:block;\r\n    clear:both;\r\n}\r\n.clearfix{\r\n    *zoom:1;\r\n}\r\ninput{\r\n    outline:none;\r\n    border: 1px solid #ccc;\r\n    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);\r\n    transition: all ease-in-out .15s;\r\n}\r\ninput:focus{\r\n    outline:none;\r\n    border-color: #66afe9;\r\n    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);\r\n}\r\n#signInAndSignUp{\r\n    background: #353F55;\r\n    width: 100vw;\r\n    height: 100vh;\r\n    position: relative;\r\n    overflow: hidden;\r\n}\r\n.signLogin-dlg{\r\n    position:absolute;\r\n    top:50%;\r\n    left:50%;\r\n    transform:translate(-50%,-50%);\r\n}\r\n.comeon{\r\n    width:300px;\r\n    overflow:hidden;\r\n    white-space:nowrap;\r\n    animation:typing 6s steps(15);\r\n    text-align: center;\r\n    margin: 0 0 25px;\r\n    color: #faffbd;\r\n    font:bold 100% Consolas, Monaco, monospace;\r\n}\r\n@keyframes typing{\r\n    from {width:0;}\r\n}\r\n.signLogin-dlg h1{\r\n    text-align:center;\r\n    font-size:2rem;\r\n    color:#fff;\r\n    margin-bottom:13px;\r\n}\r\n.dlg-wrapper{\r\n    box-shadow:0 0 8px #333;\r\n    border-radius:5px;\r\n    background: #fff;\r\n}\r\n.dlg-wrapper .sign-ct{\r\n    width: 300px;\r\n    height: 50px;\r\n    text-align: center;\r\n}\r\n.dlg-wrapper .sign-ct label{\r\n    padding:0 0 12px 16px;\r\n    color:#3B4465;\r\n    margin:0 30px;\r\n    letter-spacing:16px;\r\n    line-height:50px;\r\n    cursor:pointer;\r\n    opacity:.6;\r\n}\r\n.dlg-wrapper .sign-ct label.active{\r\n    border-bottom:2px solid #353F55;\r\n    opacity:1;\r\n}\r\n.dlg-wrapper .sign-ct label input{\r\n    display:none;\r\n}\r\n.dlg-wrapper .signUp,.dlg-wrapper .login{\r\n    width: 300px;\r\n    margin-top: 10px;\r\n    overflow: hidden;\r\n}\r\n.dlg-wrapper .formRow{\r\n    margin-bottom:20px;\r\n}\r\n.dlg-wrapper .formRow p{\r\n    width: 80%;\r\n    text-align: left;\r\n    height: 30px;\r\n    line-height: 30px;\r\n    color: #BECACA;\r\n    margin: 0 auto;\r\n}\r\n.dlg-wrapper .formRow input{\r\n    display:block;\r\n    width: 80%;\r\n    height: 40px;\r\n    line-height:40px;\r\n    margin: 0 auto;\r\n    background: #faffbd;\r\n    border-radius: 5px;\r\n    padding: 0 10px;\r\n}\r\n.dlg-wrapper .formActions{\r\n    float:right;\r\n    margin:0 30px 20px;\r\n}\r\n.dlg-wrapper .formActions input{\r\n    display:block;\r\n    width: 100px;\r\n    height: 40px;\r\n    line-height: 40px;\r\n    color: #fff;\r\n    font-size: 18px;\r\n    text-align: center;\r\n    border-radius: 1.5rem;\r\n    cursor: pointer;\r\n    background: #B0E559;\r\n    border:none;\r\n    outline:none;\r\n    transition:all .3s;\r\n}\r\n.dlg-wrapper .formActions input:hover{\r\n    background: #5CB85C;\r\n}\r\n.dlg-wrapper .login .formActions input{\r\n    color: #B0E559;\r\n    background: #fff;\r\n    border:2px solid #B0E559;\r\n}\r\n.dlg-wrapper .login .formActions input:hover{\r\n    color:#fff;\r\n    background: #B0E559;\r\n    border:2px solid #B0E559;\r\n}\r\n.sidebar{\r\n    float: left;\r\n    background: #353F55;\r\n    width: 20%;\r\n    height: 100vh;\r\n    color: #fff;\r\n}\r\n.sidebar h1{\r\n    width:60%;\r\n    margin:30px auto;\r\n    padding-bottom:20px;\r\n    letter-spacing:3px;\r\n    white-space:nowrap;\r\n}\r\n.sidebar h3{\r\n    width:60%;\r\n    margin:10px auto;\r\n}\r\n.sidebar .catlist{\r\n    width: 60%;\r\n    margin:0 auto;\r\n}\r\n.sidebar .catlist li{\r\n    margin: 10px 0;\r\n    height: 40px;\r\n    line-height: 40px;\r\n    font-size: 1rem;\r\n    cursor: pointer;\r\n}\r\n.sidebar .catlist li i{\r\n    width: 30px;\r\n    height: 50px;\r\n    line-height: 50px;\r\n}\r\n.viewpart{\r\n    float:right;\r\n    width:80%;\r\n    padding:20px 50px;\r\n    background:#fff;\r\n}\r\n.viewpart .newTask input{\r\n    width: 300px;\r\n    height: 50px;\r\n    line-height:50px;\r\n    padding: 5px 12px;\r\n    font-size: 1.2rem;\r\n    border-radius: 4px\r\n}\r\n.viewpart .btn{\r\n   display: inline-block;\r\n   width: 100px;\r\n   height: 40px;\r\n   line-height: 40px;\r\n   border-radius: 5px;\r\n   color: #fff;\r\n   margin-left: 10px;\r\n   cursor: pointer;\r\n   text-align: center;\r\n   transition: all .3s;\r\n}\r\n.viewpart .add{\r\n    background: #5CC853;\r\n}\r\n.viewpart .add:hover{\r\n    background: #469c46;\r\n}\r\n.viewpart .empty{\r\n    background: #D9534F;\r\n}\r\n.viewpart .empty:hover{\r\n    background: #B72712;\r\n}\r\n.viewpart .user-name{\r\n    float: right;\r\n    height: 50px;\r\n    line-height: 50px;\r\n    color: #777;\r\n    font-size: 14px;\r\n}\r\n.logout{\r\n    padding: 8px 10px;\r\n    background:#fff;\r\n    border: 1px solid #ccc;\r\n    border-radius: 5px;\r\n    cursor: pointer;\r\n    color: #777;\r\n    margin-left: 10px;\r\n    outline:none;\r\n    transition: all 0.5s;\r\n}\r\n.logout:hover{\r\n    background: #eee;\r\n}\r\n\r\n.viewpart .todos{\r\n    margin-top: 20px;\r\n    border: 1px solid #ccc;\r\n    border-radius: 5px;\r\n    overflow: hidden;\r\n}\r\n.viewpart .todos li{\r\n   padding: 10px 16px;\r\n   height: 60px;\r\n   line-height: 60px;\r\n   border-bottom: 1px solid #ccc;\r\n   position: relative;\r\n}\r\n.viewpart .todos li.finished {\r\n    background: #eee;\r\n}\r\n.viewpart .todos li:last-child{\r\n    border-bottom:none;\r\n}\r\n.viewpart .todos .active i{\r\n    transition: all 0.5s;\r\n    color: #5CC853;\r\n}\r\n.viewpart .todos li span:nth-child(1),\r\n.viewpart .todos li span:nth-child(2),\r\n.viewpart .todos li span:nth-child(3)\r\n{\r\n    position: absolute;\r\n    top:50%;\r\n    transform:translateY(-50%);\r\n}\r\n.viewpart .todos li span:nth-child(2){\r\n    left:50px;\r\n    cursor:pointer;\r\n    white-space: nowrap;\r\n    text-overflow: ellipsis;\r\n    width: 60%;\r\n    overflow: hidden;\r\n}\r\n.viewpart .todos li span:nth-child(3){\r\n    right:90px;\r\n    color:#ccc;\r\n    font-size:12px;\r\n}\r\n.viewpart .todos .del{\r\n    position:absolute;\r\n    top: 50%;\r\n    transform: translateY(-50%);\r\n    right: 16px;\r\n    width: 50px;\r\n    background: #FFDA44;\r\n}\r\n.viewpart .todos .del:hover{\r\n    background:#e2be50;\r\n}\r\n.todos i.fa{\r\n    cursor:pointer;\r\n}\r\n.viewpart .todos li span.finished {\r\n    transition: all 0.5s;\r\n    color: #ccc;\r\n    text-decoration: line-through;\r\n}\r\n.viewpart .todos li span.inactive i {\r\n    transition: all 0.5s;\r\n    color: #ccc;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n", ""]);
+exports.push([module.i, "@charset \"utf-8\";\r\n*{\r\n    padding:0;\r\n    margin:0;\r\n    box-sizing:border-box;\r\n}\r\nul,li{\r\n    list-style:none;\r\n}\r\nbody{\r\n    font-family:\"Helvetica Neue\",Helvetica,Arial,\"Microsoft YaHei\",\"WenQuanYi Micro Hei\",sans-serif;\r\n}\r\n.clearfix:after{\r\n    content:\"\";\r\n    display:block;\r\n    clear:both;\r\n}\r\n.clearfix{\r\n    *zoom:1;\r\n}\r\ninput{\r\n    outline:none;\r\n    border: 1px solid #ccc;\r\n    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);\r\n    transition: all ease-in-out .15s;\r\n}\r\ninput:focus{\r\n    outline:none;\r\n    border-color: #66afe9;\r\n    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);\r\n}\r\n#signInAndSignUp{\r\n    background: #353F55;\r\n    width: 100vw;\r\n    height: 100vh;\r\n    position: relative;\r\n    overflow: hidden;\r\n}\r\n.signLogin-dlg{\r\n    position:absolute;\r\n    top:50%;\r\n    left:50%;\r\n    transform:translate(-50%,-50%);\r\n}\r\n.comeon{\r\n    width:300px;\r\n    overflow:hidden;\r\n    white-space:nowrap;\r\n    animation:typing 6s steps(15);\r\n    text-align: center;\r\n    margin: 0 0 25px;\r\n    color: #faffbd;\r\n    font:bold 100% Consolas, Monaco, monospace;\r\n}\r\n@keyframes typing{\r\n    from {width:0;}\r\n}\r\n.signLogin-dlg h1{\r\n    text-align:center;\r\n    font-size:2rem;\r\n    color:#fff;\r\n    margin-bottom:13px;\r\n}\r\n.dlg-wrapper{\r\n    box-shadow:0 0 8px #333;\r\n    border-radius:5px;\r\n    background: #fff;\r\n}\r\n.dlg-wrapper .sign-ct{\r\n    width: 300px;\r\n    height: 50px;\r\n    text-align: center;\r\n}\r\n.dlg-wrapper .sign-ct label{\r\n    padding:0 0 12px 16px;\r\n    color:#3B4465;\r\n    margin:0 30px;\r\n    letter-spacing:16px;\r\n    line-height:50px;\r\n    cursor:pointer;\r\n    opacity:.6;\r\n}\r\n.dlg-wrapper .sign-ct label.active{\r\n    border-bottom:2px solid #353F55;\r\n    opacity:1;\r\n}\r\n.dlg-wrapper .sign-ct label input{\r\n    display:none;\r\n}\r\n.dlg-wrapper .signUp,.dlg-wrapper .login{\r\n    width: 300px;\r\n    margin-top: 10px;\r\n    overflow: hidden;\r\n}\r\n.dlg-wrapper .formRow{\r\n    margin-bottom:20px;\r\n}\r\n.dlg-wrapper .formRow p{\r\n    width: 80%;\r\n    text-align: left;\r\n    height: 30px;\r\n    line-height: 30px;\r\n    color: #BECACA;\r\n    margin: 0 auto;\r\n}\r\n.dlg-wrapper .formRow input{\r\n    display:block;\r\n    width: 80%;\r\n    height: 40px;\r\n    line-height:40px;\r\n    margin: 0 auto;\r\n    background: #faffbd;\r\n    border-radius: 5px;\r\n    padding: 0 10px;\r\n}\r\n.dlg-wrapper .formActions{\r\n    float:right;\r\n    margin:0 30px 20px;\r\n}\r\n.dlg-wrapper .formActions input{\r\n    display:block;\r\n    width: 100px;\r\n    height: 40px;\r\n    line-height: 40px;\r\n    color: #fff;\r\n    font-size: 18px;\r\n    text-align: center;\r\n    border-radius: 1.5rem;\r\n    cursor: pointer;\r\n    background: #B0E559;\r\n    border:none;\r\n    outline:none;\r\n    transition:all .3s;\r\n}\r\n.dlg-wrapper .formActions input:hover{\r\n    background: #5CB85C;\r\n}\r\n.dlg-wrapper .login .formActions input{\r\n    color: #B0E559;\r\n    background: #fff;\r\n    border:2px solid #B0E559;\r\n}\r\n.dlg-wrapper .login .formActions input:hover{\r\n    color:#fff;\r\n    background: #B0E559;\r\n    border:2px solid #B0E559;\r\n}\r\n.sidebar{\r\n    float: left;\r\n    background: #353F55;\r\n    width: 20%;\r\n    height: 100vh;\r\n    color: #fff;\r\n}\r\n.sidebar h1{\r\n    width:60%;\r\n    margin:30px auto;\r\n    padding-bottom:20px;\r\n    letter-spacing:3px;\r\n    white-space:nowrap;\r\n}\r\n.sidebar h3{\r\n    width:60%;\r\n    margin:10px auto;\r\n}\r\n.sidebar .catlist{\r\n    width: 60%;\r\n    margin:0 auto;\r\n}\r\n.sidebar .catlist li{\r\n    margin: 10px 0;\r\n    height: 40px;\r\n    line-height: 40px;\r\n    font-size: 1rem;\r\n    cursor: pointer;\r\n}\r\n.sidebar .catlist li:hover{\r\n    transition:transform .5s;\r\n    transform: translateX(20px);\r\n}\r\n.sidebar .catlist li i{\r\n    width: 30px;\r\n    height: 50px;\r\n    line-height: 50px;\r\n}\r\n.viewpart{\r\n    float:right;\r\n    width:80%;\r\n    padding:20px 50px;\r\n    background:#fff;\r\n}\r\n.viewpart .newTask input{\r\n    width: 300px;\r\n    height: 50px;\r\n    line-height:50px;\r\n    padding: 5px 12px;\r\n    font-size: 1.2rem;\r\n    border-radius: 4px\r\n}\r\n.viewpart .btn{\r\n   display: inline-block;\r\n   width: 100px;\r\n   height: 40px;\r\n   line-height: 40px;\r\n   border-radius: 5px;\r\n   color: #fff;\r\n   margin-left: 10px;\r\n   cursor: pointer;\r\n   text-align: center;\r\n   transition: all .3s;\r\n}\r\n.viewpart .add{\r\n    background: #5CC853;\r\n}\r\n.viewpart .add:hover{\r\n    background: #469c46;\r\n}\r\n.viewpart .empty{\r\n    background: #D9534F;\r\n}\r\n.viewpart .empty:hover{\r\n    background: #B72712;\r\n}\r\n.viewpart .user-name{\r\n    float: right;\r\n    height: 50px;\r\n    line-height: 50px;\r\n    color: #777;\r\n    font-size: 14px;\r\n}\r\n.logout{\r\n    padding: 8px 10px;\r\n    background:#fff;\r\n    border: 1px solid #ccc;\r\n    border-radius: 5px;\r\n    cursor: pointer;\r\n    color: #777;\r\n    margin-left: 10px;\r\n    outline:none;\r\n    transition: all 0.5s;\r\n}\r\n.logout:hover{\r\n    background: #eee;\r\n}\r\n\r\n.viewpart .todos{\r\n    margin-top: 20px;\r\n    border: 1px solid #ccc;\r\n    border-radius: 5px;\r\n    overflow: hidden;\r\n}\r\n.viewpart .todos li{\r\n   padding: 10px 16px;\r\n   height: 60px;\r\n   line-height: 60px;\r\n   border-bottom: 1px solid #ccc;\r\n   position: relative;\r\n}\r\n.viewpart .todos li.finished {\r\n    background: #eee;\r\n}\r\n.viewpart .todos li:last-child{\r\n    border-bottom:none;\r\n}\r\n.viewpart .todos .active i{\r\n    transition: all 0.5s;\r\n    color: #5CC853;\r\n}\r\n.viewpart .todos li span:nth-child(1),\r\n.viewpart .todos li span:nth-child(2),\r\n.viewpart .todos li span:nth-child(3)\r\n{\r\n    position: absolute;\r\n    top:50%;\r\n    transform:translateY(-50%);\r\n}\r\n.viewpart .todos li span:nth-child(2){\r\n    left:50px;\r\n    cursor:pointer;\r\n    white-space: nowrap;\r\n    text-overflow: ellipsis;\r\n    width: 60%;\r\n    overflow: hidden;\r\n}\r\n.viewpart .todos li span:nth-child(3){\r\n    right:90px;\r\n    color:#ccc;\r\n    font-size:12px;\r\n}\r\n.viewpart .todos .del{\r\n    position:absolute;\r\n    top: 50%;\r\n    transform: translateY(-50%);\r\n    right: 16px;\r\n    width: 50px;\r\n    background: #FFDA44;\r\n}\r\n.viewpart .todos .del:hover{\r\n    background:#e2be50;\r\n}\r\n.todos i.fa{\r\n    cursor:pointer;\r\n}\r\n.viewpart .todos li span.finished {\r\n    transition: all 0.5s;\r\n    color: #ccc;\r\n    text-decoration: line-through;\r\n}\r\n.viewpart .todos li span.inactive i {\r\n    transition: all 0.5s;\r\n    color: #ccc;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n", ""]);
 
 // exports
 

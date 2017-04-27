@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ToDoList</title>
+    <title>ToDoList--my</title>
     <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
@@ -40,16 +40,15 @@
 			<h1>ToDoList</h1>
 			<h3>筛选</h3>
 			<ul class="catlist">
-				<li @click="filterAll"><i class="fa fa-tags"></i>&nbsp;全部</li>
-				<li @click="filterTodo"><i class="fa fa-clock-o"></i>&nbsp;待办</li>
-				<li @click="filterFinished"><i class="fa fa-check-circle-o"></i>&nbsp;完成</li>
+				<li @click="filterAllTodo"><i class="fa fa-tags"></i>&nbsp;全部</li>
+				<li @click="filterActiveTodo"><i class="fa fa-clock-o"></i>&nbsp;待办</li>
+				<li @click="filterFinishedTodo"><i class="fa fa-check-circle-o"></i>&nbsp;完成</li>
 			</ul>
 		</div>
 		<div class="viewpart">
 			<div class="newTask clearfix">
 				<input type="text" v-model.trim="newTodo" v-on:keypress.enter="addTodo" placeholder="今日事今日毕，加油哦~">
 				<span class="btn add" @click="addTodo">添加事项</span>
-				<span class="btn empty" @click="clearAll">清空列表</span>
 				<p class="user-name">你好，{{ currentUser.username }}</span><button @click="logout" class="logout">退出</button></p>
 			</div>
 			<ol class="todos">
