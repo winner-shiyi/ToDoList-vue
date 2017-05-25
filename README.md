@@ -6,14 +6,9 @@ this is a todolist by vue
 npm install
 
 ```
-
-```
-webpack
-
-```
 open it in browser and enjoy it~
 
 ```
-open page.html
+open index.html
 
 ```
