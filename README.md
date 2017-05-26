@@ -8,7 +8,7 @@
 
 <a href="http://www.iswn.me/ToDoList-vue/" target="_blank">在线演示</a>
 
-## 运行指南:
+## 运行指南：
 
 ```
 npm install
